@@ -1,0 +1,31 @@
+{
+  "name": "tradingbot",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "c4tz",
+  "description": "A bot for semi-automated trading of cryptocurrencies",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "bin": {
+    "tradingbot": "index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c4tz/tradingbot.git"
+  },
+  "keywords": [
+    "bitcoin",
+    "chart",
+    "cli"
+  ],
+  "bugs": {
+    "url": "https://github.com/c4tz/tradingbot/issues"
+  },
+  "homepage": "https://github.com/c4tz/tradingbot#readme",
+  "dependencies": {
+    "commander": "^2.13.0",
+    "lodash": "^4.17.4"
+  }
+}
