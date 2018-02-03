@@ -13,7 +13,7 @@ const { includes }                      = require('lodash/fp')
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 const main = async () => {
-    if (includes(ccxt.exchanges, exchange)) {
+    if (includes(exchange)(ccxt.exchanges)) {
         x = new ccxt[exchange]()
     } else {
         throw 'Exchange "' + exchange + '" is not supported.'
