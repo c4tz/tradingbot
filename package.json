@@ -27,7 +27,6 @@
   "dependencies": {
     "commander": "^2.13.0",
     "ccxt": "^1.10.981",
-    "lodash": "^4.17.4",
-    "sleep": "^5.1.1"
+    "lodash": "^4.17.4"
   }
 }
