@@ -9,15 +9,14 @@ param
     .option('-e, --exchange <string>', 'Exchange to trade on')
     .option('-p, --pair <string>', 'Trading pair, e.g. ETH/BTC')
     .option('-d, --dsl <n>', 'Dynamic stop loss in percent', parseInt)
+    .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
     .parse(process.argv)
 
-if (!param.exchange || !param.pair) {
-    console.error('--exchange and --pair are required!')
-    process.exit(1)
-}
+if (!param.exchange || !param.pair) throw "--exchange and --pair are required!"
 
 module.exports = {
     exchange: param.exchange,
     pair: param.pair,
     dsl: defaultTo(5)(param.dsl),
+    tickrate: defaultTo(30)(param.tickrate)
 }
