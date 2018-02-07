@@ -1,34 +1,27 @@
-function logError(err) {
-    console.error(err)
-    process.exit(1)
-}
 
-process.on('uncaughtException', logError)
-process.on('unhandledRejection', logError)
+const assert                    = require('assert')
+const param                     = require('commander')
+const { version }               = require('./package.json')
+const { includes, defaultTo }   = require('lodash/fp')
 
-const { exchange, pair, dsl, tickrate } = require('./src/arguments.js')
-const ccxt                              = require ('ccxt')
-const { includes }                      = require('lodash/fp')
+param
+    .command('buy <exchange> <pair> <price>')
+    .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
+    .option('-d, --dsl <n>', 'Tickrate for polling', parseInt)
+    .action(function(exchange, pair, price, options){
+        if (options.tickrate && options.tickrate < 5) {
+            console.warn("Tickrate is too fast, setting it to 5")
+            options.tickrate = 5
+        }
+        var buy = require('./src/buy.js')
+        buy.trade(
+            exchange,
+            pair,
+            price,
+            defaultTo(5)(options.dsl),
+            defaultTo(30)(options.tickrate)
+        )
+    });
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
-
-const main = async () => {
-    if (!includes(exchange)(ccxt.exchanges))
-        throw 'Exchange "' + exchange + '" is not supported.'
-    if (!process.env.API_KEY || !process.env.SECRET)
-        throw 'Please set API_KEY and SECRET env variables.'
-    x = new ccxt[exchange]({
-        apiKey: process.env.API_KEY,
-        secret: process.env.SECRET
-    })
-    console.log(x.apiKey)
-}
-
-const timer = async (tickrate, callback) => {
-    if (tickrate < 5) throw "Tickrate is too fast"
-    callback()
-    await sleep(tickrate * 1000) // Tick every N seconds
-    timer(tickrate)
-}
-
-main()
+param.version(version)
+param.parse(process.argv)
