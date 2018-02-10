@@ -25,8 +25,8 @@
   },
   "homepage": "https://github.com/c4tz/tradingbot#readme",
   "dependencies": {
-    "commander": "^2.13.0",
-    "ccxt": "^1.10.981",
-    "lodash": "^4.17.4"
+    "ccxt": "^1.10.1069",
+    "commander": "^2.14.1",
+    "lodash": "^4.17.5"
   }
 }

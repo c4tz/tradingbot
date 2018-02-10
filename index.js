@@ -19,19 +19,22 @@ function createExchange(exchange) {
 
 param
     .command('buy <exchange> <pair> <price>')
+    .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
     .option('-d, --dsl <n>', 'Tickrate for polling', parseInt)
     .action(function(exchange, pair, price, options){
         exchange = createExchange(exchange)
-        if (options.tickrate && options.tickrate < 5) {
+        if (!includes('/')(pair))
+            throw 'Pair must be of ABC/XYZ format.'
+        if (options.tickrate && options.tickrate < 5)
             console.warn("Tickrate is too fast, setting it to 5")
             options.tickrate = 5
-        }
-        var buy = require('./src/buy.js')
-        buy.trade(
+        var { buy } = require('./src/buy.js')
+        buy(
             exchange,
             pair,
             price,
+            defaultTo(100)(options.volume),
             defaultTo(5)(options.dsl),
             defaultTo(30)(options.tickrate)
         )
