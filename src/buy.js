@@ -1,7 +1,7 @@
-const error             = require ('./error.js')
-const { ticker }        = require ('./ticker.js')
-const ccxt              = require ('ccxt')
-const { map, isNil, split }    = require('lodash/fp')
+const error                     = require ('./error.js')
+const { ticker }                = require ('./ticker.js')
+const ccxt                      = require ('ccxt')
+const { map, isNil, split }     = require('lodash/fp')
 
 function fullPrice(sellOrderPrice, dsl) {
     return (sellOrderPrice/(100-dsl))*100
