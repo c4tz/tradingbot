@@ -1,12 +1,12 @@
-
 const assert                    = require('assert')
 const param                     = require('commander')
 const { version }               = require('./package.json')
 const error                     = require ('./src/error.js')
 const ccxt                      = require ('ccxt')
 const { includes, defaultTo }   = require('lodash/fp')
+const { buy }                   = require('./src/buy.js')
 
-function createExchange(exchange) {
+const createExchange = exchange => {
     if (!includes(exchange)(ccxt.exchanges))
         throw 'Exchange "' + exchange + '" is not supported.'
     if (!process.env.API_KEY || !process.env.SECRET)
@@ -29,7 +29,6 @@ param
         if (options.tickrate && options.tickrate < 5)
             console.warn("Tickrate is too fast, setting it to 5")
             options.tickrate = 5
-        var { buy } = require('./src/buy.js')
         buy(
             exchange,
             pair,

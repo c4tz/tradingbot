@@ -7,17 +7,19 @@ const { map, isNil, split }         = require ('lodash/fp')
 
 
 const trade = async (exchange, pair, price, volume, dsl) => {
-    openOrders = await exchange.fetchOpenOrders(pair)
-    coin = getCoin(pair)
-    coinBalance = getBalance(exchange, coin)
-    currencyBalance = getBalance(exchange, getCurrency(pair))
-    usdtBalance = getUSDTBalance(exchange, coin, coinBalance)
+    const openOrders = await exchange.fetchOpenOrders(pair)
+    const coin = getCoin(pair)
+    const coinBalance = getBalance(exchange, coin)
+    const currencyBalance = getBalance(exchange, getCurrency(pair))
+    const usdtBalance = getUSDTBalance(exchange, coin, coinBalance)
+
     if (usdtBalance < 1 && !openOrders) { // we probably did not buy the coin yet
-        amount = (currencyBalance / 100) * volume
-        order = await exchange.createLimitBuyOrder(pair, amount, price)
+        const amount = (currencyBalance / 100) * volume
+        const order = await exchange.createLimitBuyOrder(pair, amount, price)
         return true
     }
-    else if (usdtBalance > 1) { // we already bought our desired coin
+
+    if (usdtBalance > 1) { // we already bought our desired coin
         dsl(exchange, pair, price, volume, dsl, tickrate)
         return false
     }

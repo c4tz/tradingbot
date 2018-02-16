@@ -1,4 +1,4 @@
-function getUSDTBalance(exchange, coin, balance = false) {
+const getUSDTBalance = (exchange, coin, balance = false) => {
     if (!balance)
         balance = getBalance(exchange, coin)
     if (coin != 'USDT') {
@@ -8,17 +8,12 @@ function getUSDTBalance(exchange, coin, balance = false) {
     return balance
 }
 
-function getBalance(exchange, coin) {
-    return parseFloat(exchange.fetchBalance()['total'][coin])
-}
+const getBalance = (exchange, coin) =>
+    parseFloat(exchange.fetchBalance()['total'][coin])
 
-function getCoin(pair) {
-    return split('/')(pair)[0]
-}
+const getCoin = pair => split('/')(pair)[0]
 
-function getCurrency(pair) {
-    return split('/')(pair)[1]
-}
+const getCurrency = pair => split('/')(pair)[1]
 
 module.exports = {
     getUSDTBalance: getUSDTBalance,
