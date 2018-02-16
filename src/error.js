@@ -1,4 +1,4 @@
-function logError(err) {
+const logError = err => {
     console.error(err)
     process.exit(1)
 }
