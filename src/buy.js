@@ -6,7 +6,7 @@ const { getUSDTBalance, getBalance,
 const { map, isNil, split }         = require ('lodash/fp')
 
 
-const trade = async (exchange, pair, price, volume, dsl) => {
+const buy = async (exchange, pair, price, volume) => {
     const openOrders = await exchange.fetchOpenOrders(pair)
     const coin = getCoin(pair)
     const coinBalance = getBalance(exchange, coin)
@@ -20,13 +20,8 @@ const trade = async (exchange, pair, price, volume, dsl) => {
     }
 
     if (usdtBalance > 1) { // we already bought our desired coin
-        dsl(exchange, pair, price, volume, dsl, tickrate)
         return false
     }
-}
-
-const buy = async (exchange, pair, price, volume, dsl, tickrate) => {
-    ticker(tickrate, trade, exchange, pair, price, volume, dsl)
 }
 
 module.exports = {

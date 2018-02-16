@@ -5,6 +5,8 @@ const error                     = require ('./src/error.js')
 const ccxt                      = require ('ccxt')
 const { includes, defaultTo }   = require('lodash/fp')
 const { buy }                   = require('./src/buy.js')
+const { dsl }                   = require('./src/dsl.js')
+const { ticker }                = require('./src/ticker.js')
 
 const createExchange = exchange => {
     if (!includes(exchange)(ccxt.exchanges))
@@ -18,26 +20,44 @@ const createExchange = exchange => {
 }
 
 param
-    .command('buy <exchange> <pair> <price>')
+    .version(version)
+    .option('-b, --buy', 'Buy a coin at a specific price')
+    .option('-d, --dsl', 'Set a dynamic stop loss (in %)')
+    .option('-e, --exchange <string>', 'Exchange to trade on')
+    .option('-c, --pair <string>', 'Pair to trade')
+    .option('-p, --price <n>', 'Price to buy at', parseInt)
     .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
-    .option('-d, --dsl <n>', 'Tickrate for polling', parseInt)
-    .action(function(exchange, pair, price, options){
-        exchange = createExchange(exchange)
-        if (!includes('/')(pair))
-            throw 'Pair must be of ABC/XYZ format.'
-        if (options.tickrate && options.tickrate < 5)
-            console.warn("Tickrate is too fast, setting it to 5")
-            options.tickrate = 5
-        buy(
-            exchange,
-            pair,
-            price,
-            defaultTo(100)(options.volume),
-            defaultTo(5)(options.dsl),
-            defaultTo(30)(options.tickrate)
-        )
-    });
+    .parse(process.argv)
 
-param.version(version)
-param.parse(process.argv)
+exchange = createExchange(param.exchange)
+
+
+// TODO: validate.js
+if (!includes('/')(param.pair))
+    throw 'Pair must be of ABC/XYZ format.'
+if (param.tickrate && param.tickrate < 5) {
+    console.warn("Tickrate is too fast, setting it to 5")
+    param.tickrate = 5
+}
+
+if (param.buy) {
+    ticker(
+        buy,
+        exchange,
+        param.pair,
+        param.price,
+        defaultTo(100)(param.volume),
+        defaultTo(30)(param.tickrate)
+    )
+}
+if (param.dsl) {
+    ticker(
+        dsl,
+        exchange,
+        param.pair,
+        param.price,
+        param.dsl,
+        defaultTo(30)(param.tickrate)
+    )
+}
