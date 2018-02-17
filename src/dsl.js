@@ -6,7 +6,7 @@ const { includes }                              = require ('lodash/fp')
 const fullPrice = (sellOrderPrice, dsl) =>
     (sellOrderPrice/(100-dsl))*100
 
-const run = async (exchange, pair, price, volume, dsl) => {
+const dsl = async (exchange, pair, price, dsl) => {
     const coin = getCoin(pair)
     const coinBalance = getBalance(exchange, coin)
     const usdtBalance = getUSDTBalance(exchange, coin, coinBalance)
@@ -37,11 +37,7 @@ const run = async (exchange, pair, price, volume, dsl) => {
         }
         return true
     }
-        return false // already sold, stop running
-}
-
-const dsl = async (exchange, pair, price, volume, dsl, tickrate) => {
-    ticker(tickrate, run, exchange, pair, price, volume, dsl)
+    return false // already sold, stop running
 }
 
 module.exports = {
