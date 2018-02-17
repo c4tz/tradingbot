@@ -7,17 +7,7 @@ const { includes, defaultTo }   = require('lodash/fp')
 const { buy }                   = require('./src/buy.js')
 const { dsl }                   = require('./src/dsl.js')
 const { ticker }                = require('./src/ticker.js')
-
-const createExchange = exchange => {
-    if (!includes(exchange)(ccxt.exchanges))
-        throw 'Exchange "' + exchange + '" is not supported.'
-    if (!process.env.API_KEY || !process.env.SECRET)
-        throw 'Please set API_KEY and SECRET env variables.'
-    return new ccxt[exchange]({
-        apiKey: process.env.API_KEY,
-        secret: process.env.SECRET
-    })
-}
+const { validate }              = require('./src/validation.js')
 
 param
     .version(version)
@@ -30,34 +20,19 @@ param
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
     .parse(process.argv)
 
-exchange = createExchange(param.exchange)
+// command line parameter validation, throws exception if param is invalid
+validate(param)
 
+const exchange = new ccxt[param.exchange]({
+        apiKey: process.env.API_KEY,
+        secret: process.env.SECRET
+    })
 
-// TODO: validate.js
-if (!includes('/')(param.pair))
-    throw 'Pair must be of ABC/XYZ format.'
-if (param.tickrate && param.tickrate < 5) {
-    console.warn("Tickrate is too fast, setting it to 5")
-    param.tickrate = 5
-}
+const tickrate = defaultTo(30)(param.tickrate)
+const volume = defaultTo(100)(param.volume)
 
-if (param.buy) {
-    ticker(
-        defaultTo(30)(param.tickrate),
-        buy,
-        exchange,
-        param.pair,
-        param.price,
-        defaultTo(100)(param.volume)        
-    )
-}
-if (param.dsl) {
-    ticker(
-        defaultTo(30)(param.tickrate),
-        dsl,
-        exchange,
-        param.pair,
-        param.price,
-        param.dsl
-    )
-}
+if (param.buy)
+    ticker(tickrate, buy, exchange, param.pair, param.price, volume)
+
+if (param.dsl)
+    ticker(tickrate, dsl, exchange, param.pair, param.price, param.dsl)
