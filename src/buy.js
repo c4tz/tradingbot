@@ -1,7 +1,7 @@
 const error                         = require ('./error.js')
 const { ticker }                    = require ('./ticker.js')
 const { dsl }                       = require ('./dsl.js')
-const { getUSDTBalance, getBalance,
+const { getUSDBalance, getBalance,
         getCoin, getCurrency }      = require ('./common.js')
 const { map, isNil, split }         = require ('lodash/fp')
 
@@ -11,7 +11,7 @@ const buy = async (exchange, pair, price, volume) => {
     const coin = getCoin(pair)
     const coinBalance = getBalance(exchange, coin)
     const currencyBalance = getBalance(exchange, getCurrency(pair))
-    const usdtBalance = getUSDTBalance(exchange, coin, coinBalance)
+    const usdtBalance = getUSDBalance(exchange, coin)
 
     if (usdtBalance < 1 && !openOrders) { // we probably did not buy the coin yet
         const amount = (currencyBalance / 100) * volume

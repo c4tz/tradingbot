@@ -1,12 +1,11 @@
-const getUSDTBalance = (exchange, coin, balance = false) => {
-    if (!balance)
-        balance = getBalance(exchange, coin)
-    if (coin != 'USDT') {
-        usdtPrice = exchange.fetchTicker(coin+'/USDT')['bid']
-        balance = balance * usdtPrice
-    }
-    return balance
-}
+const axios = require('axios')
+const USDAPI = `https://min-api.cryptocompare.com/data/price?fsym=`
+
+const getUSDBalance = (exchange, coin) =>
+    getBalance(exchange, coin) * getUSDValue(coin)
+
+const getUSDValue = async coin =>
+    (await axios.get(`${USDAPI}${coin}&tsyms=USD`)).data.USD
 
 const getBalance = (exchange, coin) =>
     parseFloat(exchange.fetchBalance()['total'][coin])
@@ -16,7 +15,7 @@ const getCoin = pair => split('/')(pair)[0]
 const getCurrency = pair => split('/')(pair)[1]
 
 module.exports = {
-    getUSDTBalance: getUSDTBalance,
+    getUSDBalance: getUSDBalance,
     getBalance: getBalance,
     getCoin: getCoin,
     getCurrency: getCurrency

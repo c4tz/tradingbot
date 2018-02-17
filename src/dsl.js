@@ -1,6 +1,6 @@
 const error                                     = require ('./error.js')
 const { ticker }                                = require ('./ticker.js')
-const { getUSDTBalance, getBalance, getCoin }   = require ('./common.js')
+const { getUSDBalance, getBalance, getCoin }   = require ('./common.js')
 const { includes }                              = require ('lodash/fp')
 
 const fullPrice = (sellOrderPrice, dsl) =>
@@ -9,9 +9,9 @@ const fullPrice = (sellOrderPrice, dsl) =>
 const dsl = async (exchange, pair, price, dsl) => {
     const coin = getCoin(pair)
     const coinBalance = getBalance(exchange, coin)
-    const usdtBalance = getUSDTBalance(exchange, coin, coinBalance)
+    const usdBalance = getUSDBalance(exchange, coin)
 
-    if (usdtBalance > 1) { // we probably still want to sell
+    if (usdBalance > 1) { // we probably still want to sell
         const openOrders = await exchange.fetchOpenOrders (symbol = pair)
         const currentPrice = (await exchange.fetchTicker(pair))['bid']
         if (!openOrders) {
