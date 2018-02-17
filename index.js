@@ -43,21 +43,21 @@ if (param.tickrate && param.tickrate < 5) {
 
 if (param.buy) {
     ticker(
+        defaultTo(30)(param.tickrate),
         buy,
         exchange,
         param.pair,
         param.price,
-        defaultTo(100)(param.volume),
-        defaultTo(30)(param.tickrate)
+        defaultTo(100)(param.volume)        
     )
 }
 if (param.dsl) {
     ticker(
+        defaultTo(30)(param.tickrate),
         dsl,
         exchange,
         param.pair,
         param.price,
-        param.dsl,
-        defaultTo(30)(param.tickrate)
+        param.dsl
     )
 }
