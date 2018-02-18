@@ -9,9 +9,15 @@ const { map, isNil, split }         = require ('lodash/fp')
 const buy = async (exchange, pair, price, volume) => {
     const openOrders = await exchange.fetchOpenOrders(pair)
     const coin = getCoin(pair)
-    const coinBalance = getBalance(exchange, coin)
-    const currencyBalance = getBalance(exchange, getCurrency(pair))
-    const usdtBalance = getUSDBalance(exchange, coin)
+
+    const coinBalance = await getBalance(exchange, coin)
+    console.log("Current coin balance:", coinBalance)
+
+    const currencyBalance = await getBalance(exchange, getCurrency(pair))
+    console.log("Current currency balance:", currencyBalance)
+
+    const usdtBalance = await getUSDBalance(exchange, coin)
+    console.log("Current USD balance:", usdtBalance)
 
     if (usdtBalance < 1 && !openOrders) { // we probably did not buy the coin yet
         const amount = (currencyBalance / 100) * volume
