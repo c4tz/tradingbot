@@ -19,9 +19,14 @@ const validate = param => {
     if (!process.env.API_KEY || !process.env.SECRET)
         throw 'Please set API_KEY and SECRET env variables.'
 
-    check(param.volume, "volume", 1, 100)
-    check(param.tickrate, "tickrate", 5, 600)
-    check(param.dsl, "dsl", 1, 10)
+    if (param.volume)
+        check(param.volume, "volume", 1, 100)
+
+    if (param.tickrate)
+        check(param.tickrate, "tickrate", 5, 600)
+
+    if (param.dsl)
+        check(param.dsl, "dsl", 1, 10)
 
     if (!process.env.API_KEY || !process.env.SECRET)
         throw 'Please set API_KEY and SECRET env variables.'

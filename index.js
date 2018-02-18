@@ -15,6 +15,7 @@ param
     .option('-d, --dsl', 'Set a dynamic stop loss (in %)')
     .option('-e, --exchange <string>', 'Exchange to trade on')
     .option('-c, --pair <string>', 'Pair to trade')
+    .option('--debug', 'Debug mode with sandbox API')
     .option('-p, --price <n>', 'Price to buy at', parseInt)
     .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
@@ -25,11 +26,19 @@ validate(param)
 
 const exchange = new ccxt[param.exchange]({
         apiKey: process.env.API_KEY,
-        secret: process.env.SECRET
+        secret: process.env.SECRET,
+        password: process.env.API_PASS,
     })
 
 const tickrate = defaultTo(30)(param.tickrate)
 const volume = defaultTo(100)(param.volume)
+
+
+if (param.debug) {
+    if (!exchange.urls['test'])
+        throw "Sorry there is no SANDBOX API for " + param.exchange
+    exchange.urls['api'] = exchange.urls['test']
+}
 
 if (param.buy)
     ticker(tickrate, buy, exchange, param.pair, param.price, volume)
