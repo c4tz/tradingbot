@@ -12,6 +12,9 @@ const getUSDValue = async coin =>
 const getBalance = async (exchange, coin) =>
     parseFloat((await exchange.fetchBalance())['total'][coin])
 
+const getAskPrice = async (exchange, pair) =>
+     (await exchange.fetchTicker(pair)).ask
+
 const getCoin = pair => flow(split('/'), first)(pair)
 
 const getCurrency = pair => flow(split('/'), tail, first)(pair)
@@ -20,5 +23,6 @@ module.exports = {
     getUSDBalance: getUSDBalance,
     getBalance: getBalance,
     getCoin: getCoin,
+    getAskPrice: getAskPrice,
     getCurrency: getCurrency
 }
