@@ -17,7 +17,7 @@ param
     .option('-e, --exchange <string>', 'Exchange to trade on')
     .option('-c, --pair <string>', 'Pair to trade')
     .option('--debug', 'Debug mode with sandbox API')
-    .option('-p, --price <n>', 'Price to buy at', parseInt)
+    .option('-p, --price <n>', 'Price to buy at', parseFloat)
     .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
     .option('-s, --status', 'Print all available informations for your account')
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
