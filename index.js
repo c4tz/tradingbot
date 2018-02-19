@@ -8,6 +8,7 @@ const { buy }                   = require('./src/buy.js')
 const { dsl }                   = require('./src/dsl.js')
 const { ticker }                = require('./src/ticker.js')
 const { validate }              = require('./src/validation.js')
+const { status }                = require('./src/status.js')
 
 param
     .version(version)
@@ -18,6 +19,7 @@ param
     .option('--debug', 'Debug mode with sandbox API')
     .option('-p, --price <n>', 'Price to buy at', parseInt)
     .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
+    .option('-s, --status', 'Print all available informations for your account')
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
     .parse(process.argv)
 
@@ -38,6 +40,10 @@ if (param.debug) {
     if (!exchange.urls['test'])
         throw "Sorry there is no SANDBOX API for " + param.exchange
     exchange.urls['api'] = exchange.urls['test']
+}
+
+if (param.status) {
+    status(exchange)
 }
 
 if (param.buy)
