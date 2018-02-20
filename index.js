@@ -18,6 +18,7 @@ param
     .option('-d, --dsl', 'Set a dynamic stop loss (in %)')
     .option('-e, --exchange <string>', 'Exchange to trade on')
     .option('-c, --pair <string>', 'Pair to trade')
+    .option('--bestprice', 'Buy or sell for current best ASK/BID price')
     .option('--debug', 'Debug mode with sandbox API')
     .option('-p, --price <n>', 'Price to buy at', parseFloat)
     .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
@@ -49,10 +50,10 @@ if (param.status) {
 }
 
 if (param.buy)
-    ticker(tickrate, buy, exchange, param.pair, param.price, volume)
+    ticker(tickrate, buy, exchange, param.pair, param.price, volume, param.bestprice)
 
 if (param.sell)
-    ticker(tickrate, sell, exchange, param.pair, param.price, volume)
+    ticker(tickrate, sell, exchange, param.pair, param.price, volume, param.bestprice)
 
 if (param.dsl)
     ticker(tickrate, dsl, exchange, param.pair, param.price, param.dsl)

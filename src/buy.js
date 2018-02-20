@@ -5,10 +5,11 @@ const { getUSDBalance, getBalance, cancelAllOrders,
     cancelExpiredOrders, getCoin, getCurrency, getAskPrice }
                                        = require ('./common.js')
 
-const { map, isEmpty, isNil, split, round }   = require ('lodash/fp')
+const { map, isEmpty, isNil, split }   = require ('lodash/fp')
+const { round }   = require ('lodash/math')
 const chalk = require('chalk')
 
-const buy = async (exchange, pair, price, volume) => {
+const buy = async (exchange, pair, price, volume, bestprice) => {
     const openOrders = await exchange.fetchOpenOrders(pair)
     const coin = getCoin(pair)
 
@@ -24,6 +25,8 @@ const buy = async (exchange, pair, price, volume) => {
     const askPrice = await getAskPrice(exchange, pair)
     console.log(chalk.yellow("Current ASK Price:", askPrice))
 
+    if (bestprice) price = askPrice
+
     // buy trigger is 0.1 % higher than buy order
     // the money is not freezed until the trigger is hit and
     // the order is placed on the exchange
@@ -36,7 +39,7 @@ const buy = async (exchange, pair, price, volume) => {
     console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%"))
     console.log(chalk.blue("Sell Trigger is between:", trigger_high, "and", trigger_low))
 
-    const amount =  round((((currencyBalance / 100) * volume) / price), 8)
+    const amount = round((((currencyBalance / 100) * volume) / price) * 0.997, 4)
     console.log(chalk.green("Amount of", coin, "to buy:", amount))
 
     await cancelExpiredOrders(exchange, pair)
@@ -50,7 +53,7 @@ const buy = async (exchange, pair, price, volume) => {
         return true
     }
 
-    if (usdBalance > 1) { // we already bought our desired coin
+    if (usdBalance > 1 && isEmpty(openOrders)) { // we already bought our desired coin
         console.log("bought")
         return false
     }
