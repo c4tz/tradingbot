@@ -28,6 +28,7 @@
     "ascii-art": "^1.4.2",
     "axios": "^0.17.1",
     "ccxt": "^1.10.1141",
+    "chalk": "^2.3.1",
     "commander": "^2.14.1",
     "lodash": "^4.17.5",
     "validator": "^9.4.0"
