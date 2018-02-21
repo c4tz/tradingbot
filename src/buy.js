@@ -9,40 +9,14 @@ const { map, isEmpty, isNil, split }   = require ('lodash/fp')
 const { round }   = require ('lodash/math')
 const chalk = require('chalk')
 
-const buy = async (exchange, pair, price, volume, bestprice) => {
-    const openOrders = await exchange.fetchOpenOrders(pair)
-    const coin = getCoin(pair)
+const buy = async (tradeParameter) => {
 
-    const coinBalance = await getBalance(exchange, coin)
-    console.log(chalk.bold("Current", coin, "balance:", coinBalance))
+    const { askPrice, trigger_high, exchange,
+        pair, price, currencyBalance,
+        trigger_low, usdBalance, openOrders, coin } = tradeParameter
 
-    const currencyBalance = await getBalance(exchange, getCurrency(pair))
-    console.log(chalk.bold("Current", getCurrency(pair), "balance:", currencyBalance))
-
-    const usdBalance = await getUSDBalance(exchange, coin)
-    console.log(chalk.bold("Current", coin, "value expressed in USD:", usdBalance))
-
-    const askPrice = await getAskPrice(exchange, pair)
-    console.log(chalk.yellow("Current ASK Price:", askPrice))
-
-    if (bestprice) price = askPrice
-
-    // buy trigger is 0.1 % higher than buy order
-    // the money is not freezed until the trigger is hit and
-    // the order is placed on the exchange
-    // example: if we want to buy at 10.000 then
-    // the buy order is triggered if price falls below 10.010
-    const trigger_high = price + (price * 0.001)
-    const trigger_low = price - (price * 0.001)
-
-    const dist = ((price / askPrice) - 1) * 100
-    console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%"))
-    console.log(chalk.blue("Sell Trigger is between:", trigger_high, "and", trigger_low))
-
-    const amount = round((((currencyBalance / 100) * volume) / price) * 0.997, 4)
+    const amount = round((((currencyBalance / 100) * volume) / price) * 0.997, 8)
     console.log(chalk.green("Amount of", coin, "to buy:", amount))
-
-    await cancelExpiredOrders(exchange, pair)
 
     if (askPrice < trigger_high
         && askPrice > trigger_low

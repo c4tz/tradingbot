@@ -12,8 +12,8 @@ const getUSDValue = async coin =>
 const getBalance = async (exchange, coin) =>
     parseFloat((await exchange.fetchBalance())['total'][coin])
 
-const getAskPrice = async (exchange, pair) =>
-    (await exchange.fetchTicker(pair)).ask
+const getPrice = async (exchange, pair) =>
+    await exchange.fetchTicker(pair)
 
 const cancelExpiredOrders = async (exchange, pair) => {
     const now = new Date().getTime() // unix timestamps with milliseconds
@@ -37,7 +37,7 @@ module.exports = {
     getUSDBalance: getUSDBalance,
     getBalance: getBalance,
     getCoin: getCoin,
-    getAskPrice: getAskPrice,
+    getPrice: getPrice,
     cancelAllOrders: cancelAllOrders,
     cancelExpiredOrders: cancelExpiredOrders,
     getCurrency: getCurrency

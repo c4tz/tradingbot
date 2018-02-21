@@ -4,8 +4,7 @@ const { version }               = require('./package.json')
 const error                     = require ('./src/error.js')
 const ccxt                      = require ('ccxt')
 const { includes, defaultTo }   = require('lodash/fp')
-const { buy }                   = require('./src/buy.js')
-const { sell }                   = require('./src/sell.js')
+const { trade }                   = require('./src/trade.js')
 const { dsl }                   = require('./src/dsl.js')
 const { ticker }                = require('./src/ticker.js')
 const { validate }              = require('./src/validation.js')
@@ -49,11 +48,19 @@ if (param.status) {
     status(exchange)
 }
 
-if (param.buy)
-    ticker(tickrate, buy, exchange, param.pair, param.price, volume, param.bestprice)
+const parameter = {
+    exchange: exchange,
+    pair: param.pair,
+    price: param.price,
+    volume: volume,
+    sell: param.sell,
+    buy: param.buy,
+    bestprice: param.bestprice
+}
 
-if (param.sell)
-    ticker(tickrate, sell, exchange, param.pair, param.price, volume, param.bestprice)
+if (param.buy || param.sell)
+    ticker(tickrate, trade, parameter)
 
 if (param.dsl)
     ticker(tickrate, dsl, exchange, param.pair, param.price, param.dsl)
+
