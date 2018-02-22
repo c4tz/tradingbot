@@ -15,11 +15,10 @@ const sell = async (tradeParameter) => {
         initalCoinBalance, initalCurrencyBalance,
         trigger_low, usdBalance, openOrders, coin } = tradeParameter
 
-    const targetAmount = initalCoinBalance - (amount * 1.003)
+    const targetAmount = initalCoinBalance - (amount * 0.997)
 
-    console.log(chalk.bold("Target", coin, "amount:", targetAmount))
-
-    console.log(chalk.green("Amount of", coin, "to sell:", initalCoinBalance - amount))
+    console.log(chalk.red("Target", coin, "amount:", targetAmount))
+    console.log(chalk.green("Amount of", coin, "to sell:", amount))
 
     if (coinBalance <= targetAmount && isEmpty(openOrders)) {
         console.log("Sell successfull. Hit the target amount!")

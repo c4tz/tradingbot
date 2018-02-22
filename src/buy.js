@@ -20,7 +20,7 @@ const buy = async (tradeParameter) => {
 
     const targetAmount = (initalCoinBalance + (amount * 0.997))
 
-    console.log(chalk.bold("Target", coin, "amount:", initalCoinBalance + amount))
+    console.log(chalk.red("Target", coin, "amount:", initalCoinBalance + amount))
 
     if (coinBalance >= targetAmount && isEmpty(openOrders)) {
         console.log("Buy successfull. Hit the target amount!")

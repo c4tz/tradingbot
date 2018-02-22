@@ -24,15 +24,14 @@ const trade = async (parameter) => {
 
     const coinBalance = await getBalance(exchange, coin)
     const usdBalance = await getUSDBalance(exchange, coin)
-    console.log("Current", coin, "balance:", coinBalance, "| Initial balance:", initalCoinBalance, "| USD equivalent:", usdBalance)
+    console.log("Current balance:", coinBalance, coin, "| Initial balance:", initalCoinBalance, coin, "| Equivalent to:", usdBalance.toFixed(2), "USD")
 
     const currencyBalance = await getBalance(exchange, getCurrency(pair))
-    console.log("Current", getCurrency(pair), "balance:", currencyBalance, "| Initial balance:",  initalCurrencyBalance)
+    console.log("Current balance:", currencyBalance, getCurrency(pair), "| Initial balance:",  initalCurrencyBalance, getCurrency(pair))
 
 
     const tickerPrice = (await getPrice(exchange, pair))
-    console.log(chalk.yellow("Current ASK Price:", tickerPrice.ask))
-    console.log(chalk.yellow("Current BID Price:", tickerPrice.bid))
+    console.log(chalk.yellow("ASK Price:", tickerPrice.ask, getCurrency(pair), "| BID Price:", tickerPrice.bid, getCurrency(pair)))
 
     if (bestprice) price = buy ? tickerPrice.ask : tickerPrice.bid
 
@@ -46,8 +45,7 @@ const trade = async (parameter) => {
 
 
     const dist = ((price / tickerPrice.ask) - 1) * 100
-    console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%"))
-    console.log(chalk.blue("Trigger is between:", trigger_high, "and", trigger_low))
+    console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%", "| Trigger is between:", trigger_high, "and", trigger_low))
 
     const tradeParameter = {
         price: price,
