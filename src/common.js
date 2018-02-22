@@ -26,7 +26,7 @@ const cancelExpiredOrders = async (exchange, pair) => {
     const now = new Date().getTime() // unix timestamps with milliseconds
     try {
         flow(
-            filter(o => (now - o.timestamp) > (5 * 1000) ),
+            filter(o => (now - o.timestamp) > (3 * 1000) ),
             map(order => exchange.cancelOrder(order.id))
         )(await exchange.fetchOpenOrders(pair))
     } catch (e) {

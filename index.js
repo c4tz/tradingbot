@@ -39,7 +39,7 @@ const exchange = new ccxt[param.exchange]({
         password: process.env.API_PASS,
     })
 
-const tickrate = defaultTo(5)(param.tickrate)
+const tickrate = defaultTo(3)(param.tickrate)
 const volume = defaultTo(100)(param.volume)
 
 
