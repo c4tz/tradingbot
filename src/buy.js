@@ -1,13 +1,14 @@
 const error                             = require ('./error.js')
 const { ticker }                        = require ('./ticker.js')
 const { dsl }                           = require ('./dsl.js')
-const { getUSDBalance, getBalance, cancelAllOrders,
+const { getUSDBalance, getBalance, cancelAllOrders, exchangeErrorHander,
     cancelExpiredOrders, getCoin, getCurrency, getAskPrice }
                                        = require ('./common.js')
 
-const { map, isEmpty, isNil, split }   = require ('lodash/fp')
+const { map, isEmpty, isNil, split, attempt }   = require ('lodash/fp')
 const { round }   = require ('lodash/math')
 const chalk = require('chalk')
+const ccxt                      = require ('ccxt')
 
 const buy = async (tradeParameter) => {
 
@@ -34,7 +35,11 @@ const buy = async (tradeParameter) => {
     }
 
     if (triggerHit && !targetReached && isEmpty(openOrders)) {
-        const order = await exchange.createLimitBuyOrder(pair, buyAmount, price)
+        try {
+            const order = await exchange.createLimitBuyOrder(pair, buyAmount, price)
+        } catch (error) {
+            return exchangeErrorHander(error)
+        }
         console.log(chalk.bgGreen("Buy order placed!"))
         return true
     }

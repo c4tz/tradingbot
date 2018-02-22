@@ -4,7 +4,7 @@ const { dsl }                           = require ('./dsl.js')
 const { getUSDBalance, getBalance, cancelAllOrders,
     cancelExpiredOrders, getCoin, getCurrency, getPrice }
                                        = require ('./common.js')
-const { map, isEmpty, isNil, split }   = require ('lodash/fp')
+const { map, isEmpty, isNil, split, size }   = require ('lodash/fp')
 const { round }   = require ('lodash/math')
 const chalk = require('chalk')
 const strategyBuy                   = require('./buy.js')
@@ -18,9 +18,22 @@ const trade = async (parameter) => {
     let { price } = parameter
 
     const openOrders = await exchange.fetchOpenOrders(pair)
-    console.log("Open Orders:", openOrders)
 
     const coin = getCoin(pair)
+
+    console.log(chalk.bgBlue("Bot is trying to", buy ? "buy" : "sell", amount, coin, "on", exchange.name))
+
+    if (!isEmpty(openOrders)) {
+        const printOrder = order => {
+            console.log(chalk.bold("Open Order:",
+                "Type", order.side,
+                "Pair", order.symbol,
+                "Price:", order.price,
+                "Size:", order.amount,
+                "Filled:", order.filled))
+        }
+        map(printOrder)(openOrders)
+    }
 
     const coinBalance = await getBalance(exchange, coin)
     const usdBalance = await getUSDBalance(exchange, coin)
@@ -40,8 +53,8 @@ const trade = async (parameter) => {
     // the order is placed on the exchange
     // example: if we want to buy at 10.000 then
     // the buy order is triggered if price falls below 10.010
-    const trigger_high = price + (price * 0.01)
-    const trigger_low = price - (price * 0.01)
+    const trigger_high = price + (price * 0.001)
+    const trigger_low = price - (price * 0.001)
 
 
     const dist = ((price / tickerPrice.ask) - 1) * 100
@@ -70,7 +83,7 @@ const trade = async (parameter) => {
     await cancelExpiredOrders(exchange, pair)
 
     if (buy) {
-       return await strategyBuy.buy(tradeParameter)
+        return await strategyBuy.buy(tradeParameter)
     }
     if (sell) {
         return await strategySell.sell(tradeParameter)

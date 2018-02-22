@@ -24,6 +24,12 @@ const sell = async (tradeParameter) => {
     console.log(chalk.red("Target", coin, "amount:", realTarget))
     console.log(chalk.green("Amount of", coin, "to sell:", sellAmount))
 
+    if (realTarget <= 0) {
+        console.log(chalk.bgRed("Insufficient balance for sell"))
+        return false;
+    }
+
+
     const triggerHit = bidPrice < trigger_high && bidPrice > trigger_low
     const targetReached = coinBalance <= targetAmount
 
@@ -44,8 +50,8 @@ const sell = async (tradeParameter) => {
     }
 
     if (!isEmpty(openOrders)) {
-        console.log("buy order executed")
-        console.log("wait until buy order gets filled...")
+        console.log("sell order executed")
+        console.log("wait until sell order gets filled...")
         return true
     }
 }
