@@ -1,14 +1,15 @@
 const error                             = require ('./error.js')
 const { ticker }                        = require ('./ticker.js')
 const { dsl }                           = require ('./dsl.js')
-const { getUSDBalance, getBalance, cancelAllOrders, exchangeErrorHander,
-    cancelExpiredOrders, getCoin, getCurrency, getAskPrice }
+const { getUSDBalance, getBalance,
+    cancelAllOrders, exchangeErrorHander,
+    cancelExpiredOrders, getCoin,
+    getCurrency, getAskPrice }
                                        = require ('./common.js')
 
 const { map, isEmpty, isNil, split, attempt }   = require ('lodash/fp')
 const { round }   = require ('lodash/math')
 const chalk = require('chalk')
-const ccxt                      = require ('ccxt')
 
 const buy = async (tradeParameter) => {
 

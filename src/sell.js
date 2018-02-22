@@ -1,7 +1,7 @@
 const error                             = require ('./error.js')
 const { ticker }                        = require ('./ticker.js')
 const { dsl }                           = require ('./dsl.js')
-const { getUSDBalance, getBalance, cancelAllOrders,
+const { getUSDBalance, getBalance, cancelAllOrders, exchangeErrorHander,
     cancelExpiredOrders, getCoin, getCurrency, getAskPrice }
                                        = require ('./common.js')
 const { map, isEmpty, isNil, split }   = require ('lodash/fp')
@@ -15,7 +15,6 @@ const sell = async (tradeParameter) => {
         initalCoinBalance, initalCurrencyBalance,
         trigger_low, usdBalance, openOrders, coin } = tradeParameter
 
-
     const realTarget = initalCoinBalance - amount
     const targetAmount = initalCoinBalance - (amount * 0.997)
 
@@ -23,12 +22,6 @@ const sell = async (tradeParameter) => {
 
     console.log(chalk.red("Target", coin, "amount:", realTarget))
     console.log(chalk.green("Amount of", coin, "to sell:", sellAmount))
-
-    if (realTarget <= 0) {
-        console.log(chalk.bgRed("Insufficient balance for sell"))
-        return false;
-    }
-
 
     const triggerHit = bidPrice < trigger_high && bidPrice > trigger_low
     const targetReached = coinBalance <= targetAmount
@@ -39,7 +32,11 @@ const sell = async (tradeParameter) => {
     }
 
     if (triggerHit && !targetReached && isEmpty(openOrders)) {
-        const order = await exchange.createLimitSellOrder(pair, sellAmount, price)
+        try {
+            const order = await exchange.createLimitSellOrder(pair, sellAmount, price)
+        } catch (error) {
+            return exchangeErrorHander(error)
+        }
         console.log(chalk.bgRed("Sell order placed!"))
         return true
     }

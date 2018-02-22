@@ -2,33 +2,46 @@ const axios                                     = require('axios')
 const { map, filter, split, first, tail, flow } = require('lodash/fp')
 const ccxt                                      = require ('ccxt')
 const chalk                                     = require('chalk')
+const retry                                     = require('async-retry')
 
 const USDAPI = `https://min-api.cryptocompare.com/data/price?fsym=`
+const re = async (f) => await retry(f, { retries: 500 })
 
 const getUSDBalance = async (exchange, coin) =>
-    (await getBalance(exchange, coin)) * await (getUSDValue(coin))
+    await re(async _ => (await getBalance(exchange, coin)) * await (getUSDValue(coin)))
 
 const getUSDValue = async coin =>
-    (await axios.get(`${USDAPI}${coin}&tsyms=USD`)).data.USD
+    await re(async _ =>
+        (await axios.get(`${USDAPI}${coin}&tsyms=USD`)).data.USD)
 
 const getBalance = async (exchange, coin) =>
-    parseFloat((await exchange.fetchBalance())['total'][coin])
+    await re(async _ =>
+        parseFloat((await exchange.fetchBalance())['total'][coin]))
 
 const getPrice = async (exchange, pair) =>
-    await exchange.fetchTicker(pair)
+    await re(async _ =>
+        await exchange.fetchTicker(pair))
 
 const cancelExpiredOrders = async (exchange, pair) => {
     const now = new Date().getTime() // unix timestamps with milliseconds
-    flow(
-        filter(o => (now - o.timestamp) > (5 * 1000) ),
-        map(order => exchange.cancelOrder(order.id))
-    )(await exchange.fetchOpenOrders(pair))
+    try {
+        flow(
+            filter(o => (now - o.timestamp) > (5 * 1000) ),
+            map(order => exchange.cancelOrder(order.id))
+        )(await exchange.fetchOpenOrders(pair))
+    } catch (e) {
+        exchangeErrorHander(e)
+    }
 }
 
 const cancelAllOrders = async (exchange, pair) => {
-    flow(
-        map(order => exchange.cancelOrder(order.id))
-    )(await exchange.fetchOpenOrders(pair))
+    try {
+        flow(
+            map(order => exchange.cancelOrder(order.id))
+        )(await exchange.fetchOpenOrders(pair))
+    } catch (e) {
+        exchangeErrorHander(e)
+    }
 }
 
 const getCoin = pair => flow(split('/'), first)(pair)
