@@ -15,21 +15,25 @@ const sell = async (tradeParameter) => {
         initalCoinBalance, initalCurrencyBalance,
         trigger_low, usdBalance, openOrders, coin } = tradeParameter
 
+
+    const realTarget = initalCoinBalance - amount
     const targetAmount = initalCoinBalance - (amount * 0.997)
 
-    console.log(chalk.red("Target", coin, "amount:", targetAmount))
-    console.log(chalk.green("Amount of", coin, "to sell:", amount))
+    const sellAmount = (coinBalance - realTarget).toFixed(8)
 
-    if (coinBalance <= targetAmount && isEmpty(openOrders)) {
+    console.log(chalk.red("Target", coin, "amount:", realTarget))
+    console.log(chalk.green("Amount of", coin, "to sell:", sellAmount))
+
+    const triggerHit = bidPrice < trigger_high && bidPrice > trigger_low
+    const targetReached = coinBalance <= targetAmount
+
+    if (targetReached && isEmpty(openOrders)) {
         console.log("Sell successfull. Hit the target amount!")
         return false
     }
 
-    if (bidPrice < trigger_high
-        && bidPrice > trigger_low
-        && coinBalance >= targetAmount
-        && isEmpty(openOrders)) {
-        const order = await exchange.createLimitSellOrder(pair, amount, price)
+    if (triggerHit && !targetReached && isEmpty(openOrders)) {
+        const order = await exchange.createLimitSellOrder(pair, sellAmount, price)
         console.log(chalk.bgRed("Sell order placed!"))
         return true
     }
@@ -44,7 +48,6 @@ const sell = async (tradeParameter) => {
         console.log("wait until buy order gets filled...")
         return true
     }
-
 }
 
 module.exports = {
