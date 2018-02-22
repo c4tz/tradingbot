@@ -20,7 +20,7 @@ param
     .option('--bestprice', 'Buy or sell for current best ASK/BID price')
     .option('--debug', 'Debug mode with sandbox API')
     .option('-p, --price <n>', 'Price to buy at', parseFloat)
-    .option('-v, --volume <n>', 'Volume of balance in %', parseInt)
+    .option('-a, --amount <n>', 'Volume of balance in %', parseInt)
     .option('-s, --status', 'Print all available informations for your account')
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
     .parse(process.argv)
@@ -52,7 +52,7 @@ const parameter = {
     exchange: exchange,
     pair: param.pair,
     price: param.price,
-    volume: volume,
+    amount: param.amount,
     sell: param.sell,
     buy: param.buy,
     bestprice: param.bestprice

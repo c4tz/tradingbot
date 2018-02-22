@@ -11,23 +11,22 @@ const chalk = require('chalk')
 
 const buy = async (tradeParameter) => {
 
-    const { askPrice, trigger_high, exchange,
-        pair, price, currencyBalance,
+    const { bidPrice, askPrice, trigger_high, exchange,
+        pair, price, currencyBalance,  amount,
         trigger_low, usdBalance, openOrders, coin } = tradeParameter
 
-    const amount = round((((currencyBalance / 100) * volume) / price) * 0.997, 8)
     console.log(chalk.green("Amount of", coin, "to buy:", amount))
 
     if (askPrice < trigger_high
         && askPrice > trigger_low
-        && usdBalance < 1
-        && isEmpty(openOrders)) { // we probably did not buy the coin yet
+        && currencyBalance < amount
+        && isEmpty(openOrders)) {
         const order = await exchange.createLimitBuyOrder(pair, amount, price)
         console.log(chalk.bgGreen("Buy order placed!"))
         return true
     }
 
-    if (usdBalance > 1 && isEmpty(openOrders)) { // we already bought our desired coin
+    if (currencyBalance > amount && isEmpty(openOrders)) {
         console.log("bought")
         return false
     }

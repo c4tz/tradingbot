@@ -12,7 +12,7 @@ const strategySell                   = require('./sell.js')
 
 const trade = async (parameter) => {
 
-    const { exchange, pair, volume, bestprice, buy, sell } = parameter
+    const { exchange, pair, volume, bestprice, buy, sell, amount } = parameter
     let { price } = parameter
 
     const openOrders = await exchange.fetchOpenOrders(pair)
@@ -40,8 +40,8 @@ const trade = async (parameter) => {
     // the order is placed on the exchange
     // example: if we want to buy at 10.000 then
     // the buy order is triggered if price falls below 10.010
-    const trigger_high = price + (price * 0.001)
-    const trigger_low = price - (price * 0.001)
+    const trigger_high = price + (price * 0.01)
+    const trigger_low = price - (price * 0.01)
 
 
     const dist = ((price / tickerPrice.ask) - 1) * 100
@@ -60,8 +60,9 @@ const trade = async (parameter) => {
         coinBalance: coinBalance,
         currencyBalance: currencyBalance,
         usdBalance: usdBalance,
-        volume: volume,
-        askPrice: tickerPrice.ask
+        amount: amount,
+        askPrice: tickerPrice.ask,
+        bidPrice: tickerPrice.bid
     }
 
     // cancel all expired orders (older than 1 min)
