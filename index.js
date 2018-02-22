@@ -9,6 +9,10 @@ const { dsl }                   = require('./src/dsl.js')
 const { ticker }                = require('./src/ticker.js')
 const { validate }              = require('./src/validation.js')
 const { status }                = require('./src/status.js')
+const { getUSDBalance, getBalance, cancelAllOrders,
+    cancelExpiredOrders, getCoin, getCurrency, getAskPrice }
+                                       = require ('./src/common.js')
+
 
 param
     .version(version)
@@ -20,7 +24,7 @@ param
     .option('--bestprice', 'Buy or sell for current best ASK/BID price')
     .option('--debug', 'Debug mode with sandbox API')
     .option('-p, --price <n>', 'Price to buy at', parseFloat)
-    .option('-a, --amount <n>', 'Volume of balance in %', parseInt)
+    .option('-a, --amount <n>', 'Amount of coins to buy', parseFloat)
     .option('-s, --status', 'Print all available informations for your account')
     .option('-t, --tickrate <n>', 'Tickrate for polling', parseInt)
     .parse(process.argv)
@@ -28,13 +32,14 @@ param
 // command line parameter validation, throws exception if param is invalid
 validate(param)
 
+const main = async () => {
 const exchange = new ccxt[param.exchange]({
         apiKey: process.env.API_KEY,
         secret: process.env.SECRET,
         password: process.env.API_PASS,
     })
 
-const tickrate = defaultTo(30)(param.tickrate)
+const tickrate = defaultTo(5)(param.tickrate)
 const volume = defaultTo(100)(param.volume)
 
 
@@ -48,6 +53,9 @@ if (param.status) {
     status(exchange)
 }
 
+const initalCoinBalance = await getBalance(exchange, getCoin(param.pair))
+const initalCurrencyBalance = await getBalance(exchange, getCurrency(param.pair))
+
 const parameter = {
     exchange: exchange,
     pair: param.pair,
@@ -55,8 +63,12 @@ const parameter = {
     amount: param.amount,
     sell: param.sell,
     buy: param.buy,
+    initalCoinBalance: initalCoinBalance,
+    initalCurrencyBalance: initalCurrencyBalance,
     bestprice: param.bestprice
 }
+
+
 
 if (param.buy || param.sell)
     ticker(tickrate, trade, parameter)
@@ -64,3 +76,6 @@ if (param.buy || param.sell)
 if (param.dsl)
     ticker(tickrate, dsl, exchange, param.pair, param.price, param.dsl)
 
+}
+
+main()

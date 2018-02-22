@@ -12,7 +12,9 @@ const strategySell                   = require('./sell.js')
 
 const trade = async (parameter) => {
 
-    const { exchange, pair, volume, bestprice, buy, sell, amount } = parameter
+    const { exchange, pair, volume,
+        initalCoinBalance, initalCurrencyBalance,
+        bestprice, buy, sell, amount } = parameter
     let { price } = parameter
 
     const openOrders = await exchange.fetchOpenOrders(pair)
@@ -21,13 +23,12 @@ const trade = async (parameter) => {
     const coin = getCoin(pair)
 
     const coinBalance = await getBalance(exchange, coin)
-    console.log(chalk.bold("Current", coin, "balance:", coinBalance))
+    const usdBalance = await getUSDBalance(exchange, coin)
+    console.log("Current", coin, "balance:", coinBalance, "| Initial balance:", initalCoinBalance, "| USD equivalent:", usdBalance)
 
     const currencyBalance = await getBalance(exchange, getCurrency(pair))
-    console.log(chalk.bold("Current", getCurrency(pair), "balance:", currencyBalance))
+    console.log("Current", getCurrency(pair), "balance:", currencyBalance, "| Initial balance:",  initalCurrencyBalance)
 
-    const usdBalance = await getUSDBalance(exchange, coin)
-    console.log(chalk.bold("Current", coin, "value expressed in USD:", usdBalance))
 
     const tickerPrice = (await getPrice(exchange, pair))
     console.log(chalk.yellow("Current ASK Price:", tickerPrice.ask))
@@ -56,6 +57,8 @@ const trade = async (parameter) => {
         trigger_high: trigger_high,
         trigger_low: trigger_low,
         openOrders: openOrders,
+        initalCoinBalance: initalCoinBalance,
+        initalCurrencyBalance: initalCurrencyBalance,
         coin: coin,
         coinBalance: coinBalance,
         currencyBalance: currencyBalance,
