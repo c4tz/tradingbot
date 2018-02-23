@@ -31,7 +31,7 @@ const buy = async (tradeParameter) => {
     const targetReached = coinBalance >= targetAmount
 
     if (targetReached && isEmpty(openOrders)) {
-        console.log("Buy successfull. Hit the target amount!")
+        console.log(chalk.bgGreen("Buy successfull!"))
         return false
     }
 
