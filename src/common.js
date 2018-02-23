@@ -1,18 +1,25 @@
 const axios                                     = require('axios')
-const { map, filter, split, first, tail, flow } = require('lodash/fp')
+const { map, filter, split,
+    first, isEmpty, tail, flow }                = require('lodash/fp')
 const ccxt                                      = require ('ccxt')
 const chalk                                     = require('chalk')
 const retry                                     = require('async-retry')
 const memoize                                   = require("memoizee")
 
 const USDAPI = `https://min-api.cryptocompare.com/data/price?fsym=`
+
+// retry api calls up to 500 times in case of error
 const re = async (f) => await retry(f, { retries: 500 })
 
 // cache api requests for 500 ms and prefetch results
 const m = f => memoize(f, { promise: true, maxAge: 500, preFetch: true })
 
+const getCoin = pair => flow(split('/'), first)(pair)
+const getCurrency = pair => flow(split('/'), tail, first)(pair)
+
 const getUSDBalance = m(async (exchange, coin) =>
-    await re(async _ => (await getBalance(exchange, coin)) * await (getUSDValue(coin))))
+    await re(async _ =>
+        (await getBalance(exchange, coin)) * await (getUSDValue(coin))))
 
 const getUSDValue = m(async coin =>
     await re(async _ =>
@@ -48,9 +55,19 @@ const cancelAllOrders = async (exchange, pair) => {
     }
 }
 
-const getCoin = pair => flow(split('/'), first)(pair)
-
-const getCurrency = pair => flow(split('/'), tail, first)(pair)
+const printOpenOrders = openOrders => {
+    if (!isEmpty(openOrders)) {
+        const printOrder = order => {
+            console.log(chalk.bold("Open Order:",
+                "Type", order.side,
+                "Pair", order.symbol,
+                "Price:", order.price,
+                "Size:", order.amount,
+                "Filled:", order.filled))
+        }
+        map(printOrder)(openOrders)
+    }
+}
 
 const exchangeErrorHander = error => {
     if (error instanceof ccxt.InsufficientFunds) {
@@ -68,6 +85,7 @@ const exchangeErrorHander = error => {
 module.exports = {
     getUSDBalance: getUSDBalance,
     getBalance: getBalance,
+    printOpenOrders: printOpenOrders,
     getCoin: getCoin,
     getPrice: getPrice,
     cancelAllOrders: cancelAllOrders,

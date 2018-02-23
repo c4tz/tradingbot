@@ -1,63 +1,56 @@
-const error                             = require ('./error.js')
-const { ticker }                        = require ('./ticker.js')
-const { dsl }                           = require ('./dsl.js')
-const {
-    getUSDBalance,
-    getBalance,
-    cancelAllOrders,
-    cancelExpiredOrders,
-    getCoin,
-    getCurrency,
-    getPrice }
-                                       = require ('./common.js')
-const { map, isEmpty, isNil, split, size }   = require ('lodash/fp')
-const { round }   = require ('lodash/math')
-const chalk = require('chalk')
-const strategyBuy                   = require('./buy.js')
-const strategySell                   = require('./sell.js')
+const error                                = require ('./error.js')
+const { ticker }                           = require ('./ticker.js')
+const { dsl }                              = require ('./dsl.js')
+const { getUSDBalance, getBalance,
+    cancelAllOrders, cancelExpiredOrders,
+    printOpenOrders, getCoin, getCurrency,
+    getPrice }                             = require ('./common.js')
+const { map, isEmpty, isNil, split, size } = require ('lodash/fp')
+const { round }                            = require ('lodash/math')
+const chalk                                = require('chalk')
+const stratBuy                             = require('./buy.js')
+const stratSell                            = require('./sell.js')
+
+const fetchExchangeInfo = async (exchange, pair) => {
+    const coin = getCoin(pair)
+    // batch all api requests in parallel
+    return await Promise.all(
+            [exchange.fetchOpenOrders(pair),
+             getBalance(exchange, coin),
+             getBalance(exchange, getCurrency(pair)),
+             getPrice(exchange, pair),
+             getUSDBalance(exchange, coin),
+             // cancel all expired orders (older than 1 min)
+             cancelExpiredOrders(exchange, pair)]
+        );
+}
 
 const trade = async (parameter) => {
 
-    const { exchange, pair, volume,
-        initalCoinBalance, initalCurrencyBalance,
+    const { exchange, pair, initalCoinBalance, initalCurrencyBalance,
         bestprice, buy, sell, amount } = parameter
-    let { price } = parameter
-
     const coin = getCoin(pair)
 
-    // batch all api requests in parallel
     const [openOrders, coinBalance, currencyBalance,
-        tickerPrice, usdBalance, _] = await Promise.all(
-        [exchange.fetchOpenOrders(pair),
-         getBalance(exchange, coin),
-         getBalance(exchange, getCurrency(pair)),
-         getPrice(exchange, pair),
-         getUSDBalance(exchange, coin),
-         // cancel all expired orders (older than 1 min)
-         cancelExpiredOrders(exchange, pair)]
-    );
+        tickerPrice, usdBalance, _] = await fetchExchangeInfo(exchange, pair)
 
-    console.log(chalk.bgBlue("Bot is trying to", buy ? "buy" : "sell", amount, coin, "on", exchange.name))
+    console.log(chalk.bgBlue("Bot is trying to",
+        buy ? "buy" : "sell", amount, coin, "on", exchange.name))
 
-    if (!isEmpty(openOrders)) {
-        const printOrder = order => {
-            console.log(chalk.bold("Open Order:",
-                "Type", order.side,
-                "Pair", order.symbol,
-                "Price:", order.price,
-                "Size:", order.amount,
-                "Filled:", order.filled))
-        }
-        map(printOrder)(openOrders)
-    }
+    printOpenOrders(openOrders)
 
-    console.log("Current balance:", coinBalance, coin, "| Initial balance:", initalCoinBalance, coin, "| Equivalent to:", usdBalance.toFixed(2), "USD")
+    console.log("Current balance:", coinBalance, coin,
+        "| Initial balance:", initalCoinBalance, coin,
+        "| Equivalent to:", usdBalance.toFixed(2), "USD")
 
-    console.log("Current balance:", currencyBalance, getCurrency(pair), "| Initial balance:",  initalCurrencyBalance, getCurrency(pair))
+    console.log("Current balance:", currencyBalance, getCurrency(pair),
+        "| Initial balance:",  initalCurrencyBalance, getCurrency(pair))
 
-    console.log(chalk.yellow("ASK Price:", tickerPrice.ask, getCurrency(pair), "| BID Price:", tickerPrice.bid, getCurrency(pair)))
+    console.log(chalk.yellow("ASK Price:", tickerPrice.ask, getCurrency(pair),
+        "| BID Price:", tickerPrice.bid, getCurrency(pair)))
 
-    if (bestprice) price = buy ? tickerPrice.ask : tickerPrice.bid
+    const price = bestprice ?
+        (buy ? tickerPrice.ask : tickerPrice.bid) : parameter.price
 
     // buy trigger is 0.1 % higher than buy order
     // the money is not freezed until the trigger is hit and
@@ -69,33 +62,26 @@ const trade = async (parameter) => {
 
     const dist = ((price / tickerPrice.ask) - 1) * 100
 
-    console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%", "| Trigger is between:", trigger_high, "and", trigger_low))
+    console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%",
+        "| Trigger is between:", trigger_high, "and", trigger_low))
 
     const tradeParameter = {
+        ...parameter,
         price: price,
         dist: dist,
-        pair: pair,
-        exchange: exchange,
         trigger_high: trigger_high,
         trigger_low: trigger_low,
         openOrders: openOrders,
-        initalCoinBalance: initalCoinBalance,
-        initalCurrencyBalance: initalCurrencyBalance,
         coin: coin,
         coinBalance: coinBalance,
         currencyBalance: currencyBalance,
         usdBalance: usdBalance,
-        amount: amount,
         askPrice: tickerPrice.ask,
         bidPrice: tickerPrice.bid
     }
 
-    if (buy) {
-        return await strategyBuy.buy(tradeParameter)
-    }
-    if (sell) {
-        return await strategySell.sell(tradeParameter)
-    }
+    if (buy) return await stratBuy.buy(tradeParameter)
+    if (sell) return await stratSell.sell(tradeParameter)
 }
 
 module.exports = {
