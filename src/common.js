@@ -41,17 +41,11 @@ const cancelExpiredOrders = async (exchange, pair) => {
             map(order => exchange.cancelOrder(order.id))
         )(await exchange.fetchOpenOrders(pair))
     } catch (e) {
-        exchangeErrorHander(e)
+    if (error instanceof ccxt.ExchangeNotAvailable) {
+        // this error happens if the order has been closed already
+    } else {
+       exchangeErrorHander(e)
     }
-}
-
-const cancelAllOrders = async (exchange, pair) => {
-    try {
-        flow(
-            map(order => exchange.cancelOrder(order.id))
-        )(await exchange.fetchOpenOrders(pair))
-    } catch (e) {
-        exchangeErrorHander(e)
     }
 }
 
@@ -79,7 +73,7 @@ const exchangeErrorHander = error => {
         console.log(chalk.bgRed("Might be a issue with the API. Retry ..."))
         return true
     }
-    throw error
+     throw error
 }
 
 module.exports = {
@@ -88,7 +82,6 @@ module.exports = {
     printOpenOrders: printOpenOrders,
     getCoin: getCoin,
     getPrice: getPrice,
-    cancelAllOrders: cancelAllOrders,
     exchangeErrorHander: exchangeErrorHander,
     cancelExpiredOrders: cancelExpiredOrders,
     getCurrency: getCurrency
