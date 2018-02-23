@@ -17,9 +17,19 @@ const trade = async (parameter) => {
         bestprice, buy, sell, amount } = parameter
     let { price } = parameter
 
-    const openOrders = await exchange.fetchOpenOrders(pair)
-
     const coin = getCoin(pair)
+
+    // batch all api requests in parallel
+    const [openOrders, coinBalance, currencyBalance,
+        tickerPrice, usdBalance, _] = await Promise.all(
+        [exchange.fetchOpenOrders(pair),
+         getBalance(exchange, coin),
+         getBalance(exchange, getCurrency(pair)),
+         getPrice(exchange, pair),
+         getUSDBalance(exchange, coin),
+         // cancel all expired orders (older than 1 min)
+         cancelExpiredOrders(exchange, pair)]
+    );
 
     console.log(chalk.bgBlue("Bot is trying to", buy ? "buy" : "sell", amount, coin, "on", exchange.name))
 
@@ -35,15 +45,10 @@ const trade = async (parameter) => {
         map(printOrder)(openOrders)
     }
 
-    const coinBalance = await getBalance(exchange, coin)
-    const usdBalance = await getUSDBalance(exchange, coin)
     console.log("Current balance:", coinBalance, coin, "| Initial balance:", initalCoinBalance, coin, "| Equivalent to:", usdBalance.toFixed(2), "USD")
 
-    const currencyBalance = await getBalance(exchange, getCurrency(pair))
     console.log("Current balance:", currencyBalance, getCurrency(pair), "| Initial balance:",  initalCurrencyBalance, getCurrency(pair))
 
-
-    const tickerPrice = (await getPrice(exchange, pair))
     console.log(chalk.yellow("ASK Price:", tickerPrice.ask, getCurrency(pair), "| BID Price:", tickerPrice.bid, getCurrency(pair)))
 
     if (bestprice) price = buy ? tickerPrice.ask : tickerPrice.bid
@@ -56,8 +61,8 @@ const trade = async (parameter) => {
     const trigger_high = price + (price * 0.001)
     const trigger_low = price - (price * 0.001)
 
-
     const dist = ((price / tickerPrice.ask) - 1) * 100
+
     console.log(chalk.blue("Distance to Target Price", dist.toFixed(2), "%", "| Trigger is between:", trigger_high, "and", trigger_low))
 
     const tradeParameter = {
@@ -78,9 +83,6 @@ const trade = async (parameter) => {
         askPrice: tickerPrice.ask,
         bidPrice: tickerPrice.bid
     }
-
-    // cancel all expired orders (older than 1 min)
-    await cancelExpiredOrders(exchange, pair)
 
     if (buy) {
         return await strategyBuy.buy(tradeParameter)

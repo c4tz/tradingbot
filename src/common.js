@@ -4,6 +4,8 @@ const ccxt                                      = require ('ccxt')
 const chalk                                     = require('chalk')
 const retry                                     = require('async-retry')
 
+const memoize = require("memoizee")
+
 const USDAPI = `https://min-api.cryptocompare.com/data/price?fsym=`
 const re = async (f) => await retry(f, { retries: 500 })
 
