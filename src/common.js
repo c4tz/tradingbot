@@ -3,26 +3,28 @@ const { map, filter, split, first, tail, flow } = require('lodash/fp')
 const ccxt                                      = require ('ccxt')
 const chalk                                     = require('chalk')
 const retry                                     = require('async-retry')
-
-const memoize = require("memoizee")
+const memoize                                   = require("memoizee")
 
 const USDAPI = `https://min-api.cryptocompare.com/data/price?fsym=`
 const re = async (f) => await retry(f, { retries: 500 })
 
-const getUSDBalance = async (exchange, coin) =>
-    await re(async _ => (await getBalance(exchange, coin)) * await (getUSDValue(coin)))
+// cache api requests for 500 ms and prefetch results
+const m = f => memoize(f, { promise: true, maxAge: 500, preFetch: true })
 
-const getUSDValue = async coin =>
-    await re(async _ =>
-        (await axios.get(`${USDAPI}${coin}&tsyms=USD`)).data.USD)
+const getUSDBalance = m(async (exchange, coin) =>
+    await re(async _ => (await getBalance(exchange, coin)) * await (getUSDValue(coin))))
 
-const getBalance = async (exchange, coin) =>
+const getUSDValue = m(async coin =>
     await re(async _ =>
-        parseFloat((await exchange.fetchBalance())['total'][coin]))
+        (await axios.get(`${USDAPI}${coin}&tsyms=USD`)).data.USD))
 
-const getPrice = async (exchange, pair) =>
+const getBalance = m(async (exchange, coin) =>
     await re(async _ =>
-        await exchange.fetchTicker(pair))
+        parseFloat((await exchange.fetchBalance())['total'][coin])))
+
+const getPrice = m(async (exchange, pair) =>
+    await re(async _ =>
+        await exchange.fetchTicker(pair)))
 
 const cancelExpiredOrders = async (exchange, pair) => {
     const now = new Date().getTime() // unix timestamps with milliseconds

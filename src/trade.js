@@ -1,8 +1,14 @@
 const error                             = require ('./error.js')
 const { ticker }                        = require ('./ticker.js')
 const { dsl }                           = require ('./dsl.js')
-const { getUSDBalance, getBalance, cancelAllOrders,
-    cancelExpiredOrders, getCoin, getCurrency, getPrice }
+const {
+    getUSDBalance,
+    getBalance,
+    cancelAllOrders,
+    cancelExpiredOrders,
+    getCoin,
+    getCurrency,
+    getPrice }
                                        = require ('./common.js')
 const { map, isEmpty, isNil, split, size }   = require ('lodash/fp')
 const { round }   = require ('lodash/math')
