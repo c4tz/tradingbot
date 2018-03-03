@@ -5,7 +5,7 @@ const validator = require('validator')
 const validationError = (param, lower, upper) => `Invalid value for ${param} parameter: Value should be between ${lower} and ${upper}`
 
 const check = (param, str, min, max) => {
-    if (!validator.isInt(param.toString(), { min: min, max: max }))
+    if (!validator.isFloat(param.toString(), { min: min, max: max }))
         throw validationError(str, min, max)
 }
 
@@ -26,7 +26,7 @@ const validate = param => {
         check(param.tickrate, "tickrate", 5, 600)
 
     if (param.dsl)
-        check(param.dsl, "dsl", 1, 10)
+        check(param.dsl, "dsl", 0.1, 10)
 
     if (!process.env.API_KEY || !process.env.SECRET)
         throw 'Please set API_KEY and SECRET env variables.'

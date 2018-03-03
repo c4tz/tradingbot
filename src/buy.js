@@ -1,14 +1,11 @@
-const error                             = require ('./error.js')
-const { ticker }                        = require ('./ticker.js')
-const { dsl }                           = require ('./dsl.js')
-const { getUSDBalance, getBalance,
-    cancelAllOrders, exchangeErrorHander,
-    cancelExpiredOrders, getCoin,
-    getCurrency, getAskPrice }
-                                       = require ('./common.js')
+const error                                     = require ('./error.js')
+const { ticker }                                = require ('./ticker.js')
+const { dsl }                                   = require ('./dsl.js')
+const { getUSDBalance, getBalance, cancelAllOrders, exchangeErrorHander,
+    cancelExpiredOrders, getCoin, getCurrency, getAskPrice, truncate }
+                                                = require ('./common.js')
 
 const { map, isEmpty, isNil, split, attempt }   = require ('lodash/fp')
-const { round }   = require ('lodash/math')
 const chalk = require('chalk')
 
 const buy = async (tradeParameter) => {
@@ -21,7 +18,7 @@ const buy = async (tradeParameter) => {
 
     const realTarget = initalCoinBalance + amount
     const targetAmount = (initalCoinBalance + (amount * 0.997))
-    const buyAmount = (realTarget - coinBalance).toFixed(8)
+    const buyAmount = truncate((realTarget - coinBalance), 8)
 
     console.log(chalk.red("Target", coin, "amount:", initalCoinBalance + amount))
     console.log(chalk.green("Amount of", coin, "to buy:", buyAmount))

@@ -8,6 +8,13 @@ const memoize                                   = require("memoizee")
 
 const USDAPI = `https://min-api.cryptocompare.com/data/price?fsym=`
 
+// see: https://stackoverflow.com/a/4912870
+Number.prototype.toFixedDown = function(digits) {
+    var re = new RegExp("(\\d+\\.\\d{" + digits + "})(\\d)"),
+        m = this.toString().match(re)
+    return m ? parseFloat(m[1]) : this.valueOf()
+}
+
 // retry api calls up to 500 times in case of error
 const re = async (f) => await retry(f, { retries: 500 })
 
@@ -32,6 +39,14 @@ const getBalance = m(async (exchange, coin) =>
 const getPrice = m(async (exchange, pair) =>
     await re(async _ =>
         await exchange.fetchTicker(pair)))
+
+const getMarket = m(async (exchange, pair) =>
+    await re(async _ =>
+        (await exchange.loadMarket(pair))[pair]))
+
+const truncate = function(number, digits) {
+    return number.toFixedDown(digits)
+}
 
 const cancelExpiredOrders = async (exchange, pair) => {
     const now = new Date().getTime() // unix timestamps with milliseconds
@@ -84,5 +99,6 @@ module.exports = {
     getPrice: getPrice,
     exchangeErrorHander: exchangeErrorHander,
     cancelExpiredOrders: cancelExpiredOrders,
-    getCurrency: getCurrency
+    getCurrency: getCurrency,
+    truncate: truncate
 }
