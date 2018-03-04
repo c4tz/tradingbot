@@ -60,6 +60,7 @@ const parameter = {
     amount: param.amount,
     sell: param.sell,
     buy: param.buy,
+    debug: param.debug,
     initalCoinBalance: initalCoinBalance,
     initalCurrencyBalance: initalCurrencyBalance,
     bestprice: param.bestprice,
